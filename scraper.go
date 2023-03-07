@@ -5,12 +5,6 @@ import (
 	"github.com/gocolly/colly/v2"
 )
 
-type bookmark struct {
-	id    string
-	title string
-	url   string
-}
-
 func ScrapePinboardPopular() []*bookmark {
 
 	bookmarks := make([]*bookmark, 0)

@@ -2,6 +2,12 @@ package main
 
 import "fmt"
 
+type bookmark struct {
+	id    string
+	title string
+	url   string
+}
+
 func main() {
 	popular := ScrapePinboardPopular()
 	for i := 0; i < len(popular); i++ {
