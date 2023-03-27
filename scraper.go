@@ -5,22 +5,22 @@ import (
 	"github.com/gocolly/colly/v2"
 )
 
-func ScrapePinboardPopular() []*bookmark {
+const pinboardPopularUrl = "https://pinboard.in/popular"
 
-	bookmarks := make([]*bookmark, 0)
+func ScrapePinboardPopular() []*Bookmark {
+	bookmarks := make([]*Bookmark, 0)
 
 	c := colly.NewCollector()
 
 	// Find and visit all links
 	c.OnHTML(".bookmark", func(e *colly.HTMLElement) {
-		// fmt.Println(e)
 		id := e.Attr("id")
 		title := e.ChildText(":first-child .bookmark_title")
 		href := e.ChildAttr(":first-child .bookmark_title", "href")
-		fmt.Println(id)
-		fmt.Println(title)
-		fmt.Println(href)
-		bookmarks = append(bookmarks, &bookmark{
+		//fmt.Println(id)
+		//fmt.Println(title)
+		//fmt.Println(href)
+		bookmarks = append(bookmarks, &Bookmark{
 			id:    id,
 			title: title,
 			url:   href,
@@ -31,7 +31,7 @@ func ScrapePinboardPopular() []*bookmark {
 		fmt.Println("Visiting", r.URL)
 	})
 
-	c.Visit("https://pinboard.in/popular/")
+	c.Visit(pinboardPopularUrl)
 
 	return bookmarks
 }
