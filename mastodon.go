@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"pinboard-popular-feed/data"
 	"strings"
 )
 
@@ -12,7 +13,7 @@ type MastodonCredentials struct {
 	accessToken  string
 }
 
-func TootBookmark(b Bookmark, credentials MastodonCredentials) error {
+func TootBookmark(b data.Bookmark, credentials MastodonCredentials) error {
 	tootText := buildToot(b)
 
 	fmt.Println("posting to mastodon: " + tootText)
@@ -39,16 +40,16 @@ func TootBookmark(b Bookmark, credentials MastodonCredentials) error {
 	}
 	if resp.Status != "200 OK" {
 		println("error posting to mastodon: " + resp.Status)
+		fmt.Println(resp)
 		return err
 	}
 
 	// TODO log this as a debug message
-	fmt.Println(resp)
 	fmt.Println("posted to mastodon")
 	return nil
 }
 
-func buildToot(b Bookmark) string {
-	toot := b.title + "\n" + b.url
+func buildToot(b data.Bookmark) string {
+	toot := b.Title + "\n" + b.Url
 	return toot
 }

@@ -2,4 +2,4 @@
 pinboard-popular-feed
 .envrc
 secrets.md
-database.txt
+database.json

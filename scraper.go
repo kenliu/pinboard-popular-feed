@@ -3,12 +3,13 @@ package main
 import (
 	"fmt"
 	"github.com/gocolly/colly/v2"
+	"pinboard-popular-feed/data"
 )
 
 const pinboardPopularUrl = "https://pinboard.in/popular"
 
-func ScrapePinboardPopular() []*Bookmark {
-	bookmarks := make([]*Bookmark, 0)
+func ScrapePinboardPopular() []*data.Bookmark {
+	bookmarks := make([]*data.Bookmark, 0)
 
 	c := colly.NewCollector()
 
@@ -20,10 +21,10 @@ func ScrapePinboardPopular() []*Bookmark {
 		//fmt.Println(id)
 		//fmt.Println(title)
 		//fmt.Println(href)
-		bookmarks = append(bookmarks, &Bookmark{
-			id:    id,
-			title: title,
-			url:   href,
+		bookmarks = append(bookmarks, &data.Bookmark{
+			Id:    id,
+			Title: title,
+			Url:   href,
 		})
 	})
 

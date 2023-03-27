@@ -3,13 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+	"pinboard-popular-feed/data"
 )
-
-type Bookmark struct {
-	id    string
-	title string
-	url   string
-}
 
 func buildMastodonCredentials() MastodonCredentials {
 	if os.Getenv("MASTODON_ACCESS_TOKEN") == "" {
@@ -32,11 +27,32 @@ func main() {
 	popular := ScrapePinboardPopular()
 	println("current popular bookmarks: ")
 	for i := 0; i < len(popular); i++ {
-		fmt.Println(popular[i].id)
-		fmt.Println(popular[i].title)
-		fmt.Println(popular[i].url)
+		fmt.Println(popular[i].Id)
+		fmt.Println(popular[i].Title)
+		fmt.Println(popular[i].Url)
 		println()
 	}
 
-	TootBookmark(*popular[0], buildMastodonCredentials())
+	println("found " + fmt.Sprint(len(popular)) + " bookmarks on pinboard popular")
+
+	// initialize the bookmark store
+	db := data.Init()
+	db.InitStore(data.DBConfig{})
+
+	var postCount int
+	for i := 0; i < len(popular); i++ {
+		found, err := db.FindBookmark(popular[i].Id)
+		if err != nil {
+			panic(err)
+		}
+		if !found {
+			db.StoreBookmark(*popular[i])
+			println("new bookmark stored")
+			postCount++
+			TootBookmark(*popular[i], buildMastodonCredentials())
+		}
+		// TODO implement some kind of rate limiting?
+		// https://docs.joinmastodon.org/api/rate-limits/
+	}
+	println("posted " + fmt.Sprint(postCount) + " new bookmarks")
 }
