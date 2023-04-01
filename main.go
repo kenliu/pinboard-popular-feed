@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"pinboard-popular-feed/data"
 )
@@ -13,6 +14,16 @@ func main() {
 	dryRun := flag.Bool("dryrun", false, "scan for new posts but don't post to mastodon")
 	flag.Parse()
 
+	// set up log file
+	logFile, err := os.OpenFile("pinboard-popular-feed.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Println("error opening log file")
+		os.Exit(1)
+	}
+	defer logFile.Close()
+	log.SetOutput(logFile)
+
+	// set up mastodon credentials
 	mastodonCredentials, err := buildMastodonCredentials()
 	if err != nil {
 		os.Exit(1)
@@ -20,7 +31,7 @@ func main() {
 
 	popular, err := fetchCurrentPinboardPopular()
 	if err != nil {
-		fmt.Println("error scraping popular bookmarks")
+		log.Println("error scraping popular bookmarks")
 		os.Exit(1)
 	}
 
@@ -30,20 +41,20 @@ func main() {
 
 	postCount, err := postNewLinks(popular, db, mastodonCredentials, *dryRun)
 	if err != nil {
-		fmt.Println("error posting new links")
+		log.Println("error posting new links")
 		os.Exit(1)
 	}
-	fmt.Println("posted " + fmt.Sprint(postCount) + " new bookmarks")
+	log.Println("posted " + fmt.Sprint(postCount) + " new bookmarks")
 }
 
 func buildMastodonCredentials() (MastodonCredentials, error) {
 	if os.Getenv("MASTODON_ACCESS_TOKEN") == "" {
-		fmt.Println("MASTODON_ACCESS_TOKEN not set")
+		log.Println("MASTODON_ACCESS_TOKEN not set")
 		return MastodonCredentials{}, errors.New("MASTODON_ACCESS_TOKEN not set")
 	}
 
 	if os.Getenv("MASTODON_SERVER_DOMAIN") == "" {
-		fmt.Println("MASTODON_SERVER_DOMAIN not set")
+		log.Println("MASTODON_SERVER_DOMAIN not set")
 		return MastodonCredentials{}, errors.New("MASTODON_SERVER_DOMAIN not set")
 	}
 
@@ -54,21 +65,20 @@ func buildMastodonCredentials() (MastodonCredentials, error) {
 }
 
 func postNewLinks(popular []*data.Bookmark, db data.BookmarkStore, mastodonCredentials MastodonCredentials, dryRun bool) (int, error) {
-	fmt.Println("dryrun: not posting any new bookmarks")
+	log.Println("dryrun: not posting any new bookmarks")
 	var postCount int
 	for i := 0; i < len(popular); i++ {
 		found, err := db.FindBookmark(popular[i].Id)
 		if err != nil {
-			fmt.Println("error finding bookmark in store: " + popular[i].Id)
+			log.Println("error finding bookmark in store: " + popular[i].Id)
 			return postCount, err
 		}
 		if !found {
 			if dryRun {
-				fmt.Println("dry run: new bookmark found, but not posted")
-				continue
+				log.Println("dry run: new bookmark found, but not posted")
 			} else {
 				db.StoreBookmark(*popular[i])
-				fmt.Println("new bookmark stored")
+				log.Println("new bookmark stored")
 				postCount++
 				TootBookmark(*popular[i], mastodonCredentials)
 			}
@@ -81,14 +91,14 @@ func postNewLinks(popular []*data.Bookmark, db data.BookmarkStore, mastodonCrede
 
 func fetchCurrentPinboardPopular() ([]*data.Bookmark, error) {
 	popular, _ := ScrapePinboardPopular()
-	fmt.Println("current popular bookmarks: ")
+	log.Println("current popular bookmarks: ")
 	for i := 0; i < len(popular); i++ {
-		fmt.Println(popular[i].Id)
-		fmt.Println(popular[i].Title)
-		fmt.Println(popular[i].Url)
-		fmt.Println()
+		log.Println(popular[i].Id)
+		log.Println(popular[i].Title)
+		log.Println(popular[i].Url)
+		log.Println()
 	}
 
-	fmt.Println("found " + fmt.Sprint(len(popular)) + " bookmarks on pinboard popular")
+	log.Println("found " + fmt.Sprint(len(popular)) + " bookmarks on pinboard popular")
 	return popular, nil //TODO handle any errors
 }

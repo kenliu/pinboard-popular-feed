@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gocolly/colly/v2"
+	"log"
 	"pinboard-popular-feed/data"
 )
 
@@ -18,9 +18,9 @@ func ScrapePinboardPopular() ([]*data.Bookmark, error) {
 		id := e.Attr("id")
 		title := e.ChildText(":first-child .bookmark_title")
 		href := e.ChildAttr(":first-child .bookmark_title", "href")
-		//fmt.Println(id)
-		//fmt.Println(title)
-		//fmt.Println(href)
+		//log.Println(id)
+		//log.Println(title)
+		//log.Println(href)
 		bookmarks = append(bookmarks, &data.Bookmark{
 			Id:    id,
 			Title: title,
@@ -29,7 +29,7 @@ func ScrapePinboardPopular() ([]*data.Bookmark, error) {
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL)
+		log.Println("Visiting", r.URL)
 	})
 
 	err := c.Visit(pinboardPopularUrl)
