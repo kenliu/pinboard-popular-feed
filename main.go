@@ -2,12 +2,17 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"os"
 	"pinboard-popular-feed/data"
 )
 
 func main() {
+	// handle dry-run command line flag
+	dryRun := flag.Bool("dryrun", false, "scan for new posts but don't post to mastodon")
+	flag.Parse()
+
 	mastodonCredentials, err := buildMastodonCredentials()
 	if err != nil {
 		os.Exit(1)
@@ -23,7 +28,7 @@ func main() {
 	db := data.Init()
 	db.InitStore(data.DBConfig{})
 
-	postCount, err := postNewLinks(popular, db, mastodonCredentials)
+	postCount, err := postNewLinks(popular, db, mastodonCredentials, *dryRun)
 	if err != nil {
 		println("error posting new links")
 		os.Exit(1)
@@ -48,18 +53,25 @@ func buildMastodonCredentials() (MastodonCredentials, error) {
 	}, nil
 }
 
-func postNewLinks(popular []*data.Bookmark, db data.BookmarkStore, mastodonCredentials MastodonCredentials) (int, error) {
+func postNewLinks(popular []*data.Bookmark, db data.BookmarkStore, mastodonCredentials MastodonCredentials, dryRun bool) (int, error) {
+	println("dryrun: not posting any new bookmarks")
 	var postCount int
 	for i := 0; i < len(popular); i++ {
 		found, err := db.FindBookmark(popular[i].Id)
 		if err != nil {
-			panic(err) //TODO handle this error
+			println("error finding bookmark in store: " + popular[i].Id)
+			return postCount, err
 		}
 		if !found {
-			db.StoreBookmark(*popular[i])
-			println("new bookmark stored")
-			postCount++
-			TootBookmark(*popular[i], mastodonCredentials)
+			if dryRun {
+				println("dry run: new bookmark found, but not posted")
+				continue
+			} else {
+				db.StoreBookmark(*popular[i])
+				println("new bookmark stored")
+				postCount++
+				TootBookmark(*popular[i], mastodonCredentials)
+			}
 		}
 		// TODO implement some kind of rate limiting?
 		// https://docs.joinmastodon.org/api/rate-limits/
@@ -68,7 +80,7 @@ func postNewLinks(popular []*data.Bookmark, db data.BookmarkStore, mastodonCrede
 }
 
 func fetchCurrentPinboardPopular() ([]*data.Bookmark, error) {
-	popular := ScrapePinboardPopular()
+	popular, _ := ScrapePinboardPopular()
 	println("current popular bookmarks: ")
 	for i := 0; i < len(popular); i++ {
 		fmt.Println(popular[i].Id)

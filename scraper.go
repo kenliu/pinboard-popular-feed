@@ -8,7 +8,7 @@ import (
 
 const pinboardPopularUrl = "https://pinboard.in/popular"
 
-func ScrapePinboardPopular() []*data.Bookmark {
+func ScrapePinboardPopular() ([]*data.Bookmark, error) {
 	bookmarks := make([]*data.Bookmark, 0)
 
 	c := colly.NewCollector()
@@ -32,7 +32,7 @@ func ScrapePinboardPopular() []*data.Bookmark {
 		fmt.Println("Visiting", r.URL)
 	})
 
-	c.Visit(pinboardPopularUrl)
+	err := c.Visit(pinboardPopularUrl)
 
-	return bookmarks
+	return bookmarks, err
 }
