@@ -14,7 +14,7 @@ func main() {
 	dryRun := flag.Bool("dryrun", false, "scan for new posts but don't post to mastodon")
 	flag.Parse()
 
-	// set up log file
+	// set up logging
 	logFile, err := os.OpenFile("pinboard-popular-feed.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Println("error opening log file")
