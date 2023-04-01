@@ -23,6 +23,8 @@ func main() {
 	defer logFile.Close()
 	log.SetOutput(logFile)
 
+	log.Println("starting pinboard-popular-feed")
+
 	// set up mastodon credentials
 	mastodonCredentials, err := buildMastodonCredentials()
 	if err != nil {
@@ -41,10 +43,11 @@ func main() {
 
 	postCount, err := postNewLinks(popular, db, mastodonCredentials, *dryRun)
 	if err != nil {
-		log.Println("error posting new links")
+		log.Println("error posting new bookmarks")
 		os.Exit(1)
 	}
 	log.Println("posted " + fmt.Sprint(postCount) + " new bookmarks")
+	log.Println("finished pinboard-popular-feed")
 }
 
 func buildMastodonCredentials() (MastodonCredentials, error) {
@@ -90,7 +93,12 @@ func postNewLinks(popular []*data.Bookmark, db data.BookmarkStore, mastodonCrede
 }
 
 func fetchCurrentPinboardPopular() ([]*data.Bookmark, error) {
-	popular, _ := ScrapePinboardPopular()
+	popular, err := ScrapePinboardPopular()
+	if err != nil {
+		log.Println("error scraping pinboard popular")
+		return nil, err
+	}
+
 	log.Println("current popular bookmarks: ")
 	for i := 0; i < len(popular); i++ {
 		log.Println(popular[i].Id)
@@ -100,5 +108,5 @@ func fetchCurrentPinboardPopular() ([]*data.Bookmark, error) {
 	}
 
 	log.Println("found " + fmt.Sprint(len(popular)) + " bookmarks on pinboard popular")
-	return popular, nil //TODO handle any errors
+	return popular, err //TODO handle any errors
 }

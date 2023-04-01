@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"github.com/gocolly/colly/v2"
 	"log"
 	"pinboard-popular-feed/data"
@@ -33,6 +35,10 @@ func ScrapePinboardPopular() ([]*data.Bookmark, error) {
 	})
 
 	err := c.Visit(pinboardPopularUrl)
+	if err != nil {
+		log.Println("error fetching pinboard popular page: " + fmt.Sprint(errors.Unwrap(err)))
+		return nil, err
+	}
 
 	return bookmarks, err
 }
