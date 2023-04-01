@@ -27,7 +27,7 @@ func TootBookmark(b data.Bookmark, credentials MastodonCredentials) error {
 	//generate an error intentionally
 	//req, err := http.NewRequest("POST", endpoint, nil)
 	if err != nil {
-		println("error creating request")
+		fmt.Println("error creating request")
 		return err
 	}
 
@@ -35,11 +35,11 @@ func TootBookmark(b data.Bookmark, credentials MastodonCredentials) error {
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	resp, err := client.Do(req)
 	if err != nil {
-		println("error posting to mastodon")
+		fmt.Println("error posting to mastodon")
 		return err
 	}
 	if resp.Status != "200 OK" {
-		println("error posting to mastodon: " + resp.Status)
+		fmt.Println("error posting to mastodon: " + resp.Status)
 		fmt.Println(resp)
 		return err
 	}
