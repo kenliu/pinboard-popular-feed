@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>Label</key>
+        <string>com.github.kenliu.PinboardPopularFeed</string>
+
+        <key>ServiceDescription</key>
+        <string>Mastodon bot that scrapes the latest Pinboard Popular social links and posts them to a Mastodon bot account</string>
+
+        <key>Program</key>
+        <string>/Users/FILL ME IN/server/pinboard-popular-feed/pinboard-popular-feed</string>
+
+        <key>WorkingDirectory</key>
+        <string>/Users/FILL ME IN/server/pinboard-popular-feed</string>
+
+        <key>StandardErrorPath</key>
+        <string>/Users/FILL ME IN/server/pinboard-popular-feed/pinboard-popular-feed.log</string>
+
+        <!-- Fill in this key with the access token for your Mastodon bot account -->
+        <key>EnvironmentVariables</key>
+        <dict>
+            <key>MASTODON_ACCESS_TOKEN</key>
+            <string>FILL ME IN</string>
+        </dict>
+
+        <!-- Fill in this key with the domain of your Mastodon server -->
+        <key>EnvironmentVariables</key>
+        <dict>
+            <key>MASTODON_SERVER_DOMAIN</key>
+            <string>FILL ME IN</string>
+        </dict>
+
+        <key>StartCalendarInterval</key>
+        <dict>
+            <key>Hour</key>
+            <integer>10</integer>
+            <key>Minute</key>
+            <integer>0</integer>
+        </dict>
+
+        <key>RunAtLoad</key>
+        <false />
+    </dict>
+</plist>
