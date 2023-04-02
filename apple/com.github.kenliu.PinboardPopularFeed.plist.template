@@ -17,16 +17,13 @@
         <key>StandardErrorPath</key>
         <string>/Users/FILL ME IN/server/pinboard-popular-feed/pinboard-popular-feed.log</string>
 
-        <!-- Fill in this key with the access token for your Mastodon bot account -->
         <key>EnvironmentVariables</key>
         <dict>
+            <!-- Fill in this key with the access token for your Mastodon bot account -->
             <key>MASTODON_ACCESS_TOKEN</key>
             <string>FILL ME IN</string>
-        </dict>
 
-        <!-- Fill in this key with the domain of your Mastodon server -->
-        <key>EnvironmentVariables</key>
-        <dict>
+            <!-- Fill in this key with the domain of your Mastodon server -->
             <key>MASTODON_SERVER_DOMAIN</key>
             <string>FILL ME IN</string>
         </dict>
