@@ -5,3 +5,6 @@ secrets.md
 database.json
 *.log
 
+# ignore any secrets json files stored in the root directory
+/*.json
+
