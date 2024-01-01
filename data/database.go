@@ -1,72 +1,82 @@
 package data
 
 import (
-	"encoding/json"
-	"io"
+	"database/sql"
+	"fmt"
+	_ "github.com/lib/pq"
+	"log"
 	"os"
 )
 
 type Bookmark struct {
-	Id    string
-	Title string
-	Url   string
+	BookmarkId string
+	Title      string
+	Url        string
 }
 
 type BookmarkStore struct {
-	bookmarks map[string]Bookmark
+	conn *sql.DB
 }
 
 type DBConfig struct {
+	Username string
+	Password string
+	Host     string
+	Port     string
+	Database string
 }
 
-func Init() BookmarkStore {
-	return BookmarkStore{
-		bookmarks: make(map[string]Bookmark),
+func CreateDBConfigFromEnv() DBConfig {
+	// populate an instance of config struct using environment variables
+	config := DBConfig{
+		Username: os.Getenv("DB_USERNAME"),
+		Password: os.Getenv("DB_PASSWORD"),
+		Host:     os.Getenv("DB_HOST"),
+		Port:     os.Getenv("DB_PORT"),
+		Database: os.Getenv("DB_NAME"),
 	}
+	return config
 }
 
-func (store BookmarkStore) InitStore(config DBConfig) error {
-	err := loadDB(&store.bookmarks)
+func (store *BookmarkStore) InitStore(config DBConfig) error {
+	// create connection string in this format: "postgresql://username:password@hostname:port/dbname?sslmode=require"
+	connStr := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=require", config.Username, config.Password, config.Host, config.Port, config.Database)
+
+	// Open a database connection
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		panic(err)
+		log.Fatal("error connecting to the database: ", err)
 	}
-	return nil
+	// defer db.Close()
+
+	store.conn = db
+	fmt.Println("Successfully connected to the database")
+	return err
 }
 
 func (store BookmarkStore) StoreBookmark(bookmark Bookmark) error {
-	store.bookmarks[bookmark.Id] = bookmark
+	_, err := store.conn.Exec("INSERT INTO bookmarks (bookmark_id, title, url) VALUES ($1, $2, $3)",
+		bookmark.BookmarkId, bookmark.Title, bookmark.Url)
 
-	j, err := json.Marshal(store.bookmarks)
 	if err != nil {
-		panic(err)
+		log.Fatal("error inserting into the database: ", err)
 	}
-
-	_ = os.WriteFile("database.json", j, 0644)
 	return nil
 }
 
-func (store BookmarkStore) FindBookmark(id string) (bool, error) {
-	_, found := store.bookmarks[id]
-	if found {
+func (store BookmarkStore) FindBookmark(bookmarkId string) (bool, error) {
+	// query the database to see if the bookmark exists for the given bookmarkId
+	rows, err := store.conn.Query("SELECT id FROM bookmarks WHERE bookmark_id = $1", bookmarkId)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+
+	// iterate over the rows and return true if a row was found
+	for rows.Next() {
 		return true, nil
-	} else {
-		return false, nil
 	}
-}
 
-func (store BookmarkStore) UpdatePostedBookmark() error {
-	return nil
-}
-
-func loadDB(db *map[string]Bookmark) error {
-	jsonFile, err := os.Open("database.json")
-	if err != nil {
-		panic(err)
-	}
-	defer jsonFile.Close()
-
-	byteValue, _ := io.ReadAll(jsonFile)
-
-	json.Unmarshal(byteValue, &db)
-	return nil
+	// return false if no row was found
+	return false, nil
 }

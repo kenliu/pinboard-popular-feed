@@ -24,9 +24,9 @@ func ScrapePinboardPopular() ([]*data.Bookmark, error) {
 		//log.Println(title)
 		//log.Println(href)
 		bookmarks = append(bookmarks, &data.Bookmark{
-			Id:    id,
-			Title: title,
-			Url:   href,
+			BookmarkId: id,
+			Title:      title,
+			Url:        href,
 		})
 	})
 

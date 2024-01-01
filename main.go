@@ -38,8 +38,9 @@ func main() {
 	}
 
 	// initialize the bookmark store
-	db := data.Init()
-	db.InitStore(data.DBConfig{})
+	//db := data.Init()
+	var db = data.BookmarkStore{}
+	db.InitStore(data.CreateDBConfigFromEnv())
 
 	postCount, err := postNewLinks(popular, db, mastodonCredentials, *dryRun)
 	if err != nil {
@@ -68,12 +69,13 @@ func buildMastodonCredentials() (MastodonCredentials, error) {
 }
 
 func postNewLinks(popular []*data.Bookmark, db data.BookmarkStore, mastodonCredentials MastodonCredentials, dryRun bool) (int, error) {
+	//TODO there should be an if statement here
 	log.Println("dryrun: not posting any new bookmarks")
 	var postCount int
 	for i := 0; i < len(popular); i++ {
-		found, err := db.FindBookmark(popular[i].Id)
+		found, err := db.FindBookmark(popular[i].BookmarkId)
 		if err != nil {
-			log.Println("error finding bookmark in store: " + popular[i].Id)
+			log.Println("error finding bookmark in store: " + popular[i].BookmarkId)
 			return postCount, err
 		}
 		if !found {
@@ -101,7 +103,7 @@ func fetchCurrentPinboardPopular() ([]*data.Bookmark, error) {
 
 	log.Println("current popular bookmarks: ")
 	for i := 0; i < len(popular); i++ {
-		log.Println(popular[i].Id)
+		log.Println(popular[i].BookmarkId)
 		log.Println(popular[i].Title)
 		log.Println(popular[i].Url)
 		log.Println()
