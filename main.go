@@ -15,6 +15,8 @@ func main() {
 	flag.Parse()
 
 	// set up logging
+	// TODO here we want to write to stdout when running in cloud run
+	// maybe we have a flag to log to stdout?
 	logFile, err := os.OpenFile("pinboard-popular-feed.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Println("error opening log file")
@@ -26,7 +28,7 @@ func main() {
 	log.Println("starting pinboard-popular-feed")
 
 	// set up mastodon credentials
-	mastodonCredentials, err := buildMastodonCredentials()
+	mastodonCredentials, err := createMastodonCredentialsFromEnv()
 	if err != nil {
 		os.Exit(1)
 	}
@@ -51,7 +53,7 @@ func main() {
 	log.Println("finished pinboard-popular-feed")
 }
 
-func buildMastodonCredentials() (MastodonCredentials, error) {
+func createMastodonCredentialsFromEnv() (MastodonCredentials, error) {
 	if os.Getenv("MASTODON_ACCESS_TOKEN") == "" {
 		log.Println("MASTODON_ACCESS_TOKEN not set")
 		return MastodonCredentials{}, errors.New("MASTODON_ACCESS_TOKEN not set")

@@ -50,7 +50,7 @@ func (store *BookmarkStore) InitStore(config DBConfig) error {
 	// defer db.Close()
 
 	store.conn = db
-	fmt.Println("Successfully connected to the database")
+	log.Println("Successfully connected to the database")
 	return err
 }
 

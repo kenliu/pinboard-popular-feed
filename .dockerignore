@@ -1,11 +1,8 @@
 .idea/
-pinboard-popular-feed
 .envrc
-todo.md
 secrets.md
 database.json
 *.log
 
 # ignore any secrets json files stored in the root directory
 /*.json
-
