@@ -21,4 +21,4 @@ require (
 	google.golang.org/protobuf v1.24.0 // indirect
 )
 
-go 1.20
+go 1.23
