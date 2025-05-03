@@ -34,5 +34,6 @@ WORKDIR /app
 # Copy the binary from the builder stage
 COPY --from=builder /app/pinboard-popular-feed .
 
-# Run the application
-CMD ["./pinboard-popular-feed"] 
+# Set the entrypoint and default command
+ENTRYPOINT ["./pinboard-popular-feed"]
+CMD [] 
