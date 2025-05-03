@@ -4,8 +4,8 @@ FROM golang:1.24-alpine AS builder
 # Install build dependencies
 RUN apk add --no-cache git
 
-# Print Go version with full version info
-RUN go version -v
+# Print Go version
+RUN go version
 
 # Set working directory
 WORKDIR /app
