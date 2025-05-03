@@ -24,6 +24,10 @@ func main() {
 	log.SetOutput(logFile)
 
 	log.Println("starting pinboard-popular-feed")
+	if *dryRun {
+		log.Println("DRY RUN MODE: Showing what would be posted")
+		fmt.Println("DRY RUN MODE: Showing what would be posted")
+	}
 
 	// set up mastodon credentials
 	mastodonCredentials, err := buildMastodonCredentials()
@@ -70,7 +74,7 @@ func buildMastodonCredentials() (MastodonCredentials, error) {
 
 func postNewLinks(popular []*data.Bookmark, db data.BookmarkStore, mastodonCredentials MastodonCredentials, dryRun bool) (int, error) {
 	if dryRun {
-		log.Println("dryrun: not posting any new bookmarks")
+		log.Println("DRY RUN MODE: Showing what would be posted")
 	} else {
 		log.Println("posting bookmarks to " + mastodonCredentials.serverDomain)
 	}
@@ -84,7 +88,8 @@ func postNewLinks(popular []*data.Bookmark, db data.BookmarkStore, mastodonCrede
 		}
 		if !found {
 			if dryRun {
-				log.Println("dry run: new bookmark found, but not posted")
+				log.Printf("DRY RUN: Would post new bookmark:\nID: %s\nTitle: %s\nURL: %s\n",
+					popular[i].BookmarkId, popular[i].Title, popular[i].Url)
 			} else {
 				db.StoreBookmark(*popular[i])
 				log.Println("new bookmark stored")
