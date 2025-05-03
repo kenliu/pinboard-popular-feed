@@ -48,7 +48,7 @@ func main() {
 		os.Exit(1)
 	}
 	log.Println("posted " + fmt.Sprint(postCount) + " new bookmarks")
-	log.Println("finished pinboard-popular-feed")
+	log.Println("finished pinboard-popular-feed update")
 }
 
 func buildMastodonCredentials() (MastodonCredentials, error) {
@@ -69,8 +69,12 @@ func buildMastodonCredentials() (MastodonCredentials, error) {
 }
 
 func postNewLinks(popular []*data.Bookmark, db data.BookmarkStore, mastodonCredentials MastodonCredentials, dryRun bool) (int, error) {
-	//TODO there should be an if statement here
-	log.Println("dryrun: not posting any new bookmarks")
+	if dryRun {
+		log.Println("dryrun: not posting any new bookmarks")
+	} else {
+		log.Println("posting bookmarks to " + mastodonCredentials.serverDomain)
+	}
+
 	var postCount int
 	for i := 0; i < len(popular); i++ {
 		found, err := db.FindBookmark(popular[i].BookmarkId)
@@ -102,7 +106,7 @@ func fetchCurrentPinboardPopular() ([]*data.Bookmark, error) {
 	}
 
 	log.Println("current popular bookmarks: ")
-	for i := 0; i < len(popular); i++ {
+	for i := range popular {
 		log.Println(popular[i].BookmarkId)
 		log.Println(popular[i].Title)
 		log.Println(popular[i].Url)
