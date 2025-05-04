@@ -5,7 +5,7 @@ set -e
 
 # Configuration
 PROJECT_ID="${GOOGLE_CLOUD_PROJECT:-pinboard-popular-feed-dev}"
-SERVICE_NAME="pinboard-popular-feed"
+JOB_NAME="pinboard-popular-feed"
 REGION="us-central1"
 IMAGE_TAG="latest"
 REPOSITORY="pinboard-popular-feed"
@@ -45,11 +45,11 @@ gcloud auth configure-docker ${REGION}-docker.pkg.dev
 
 # Build the Docker image
 echo "Building Docker image..."
-docker build -t ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${SERVICE_NAME}:${IMAGE_TAG} .
+docker build -t ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${JOB_NAME}:${IMAGE_TAG} .
 
 # Push the image to Artifact Registry
 echo "Pushing image to Artifact Registry..."
-docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${SERVICE_NAME}:${IMAGE_TAG}
+docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${JOB_NAME}:${IMAGE_TAG}
 
 # Prepare environment variables string
 ENV_VARS_STRING=""
@@ -59,14 +59,13 @@ done
 # Remove trailing comma
 ENV_VARS_STRING=${ENV_VARS_STRING%,}
 
-# Deploy to Cloud Run
-echo "Deploying to Cloud Run..."
-gcloud run deploy ${SERVICE_NAME} \
-    --image ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${SERVICE_NAME}:${IMAGE_TAG} \
+# Deploy to Cloud Run Job
+echo "Deploying to Cloud Run Job..."
+gcloud run jobs deploy ${JOB_NAME} \
+    --image ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${JOB_NAME}:${IMAGE_TAG} \
     --region ${REGION} \
-    --platform managed \
-    --allow-unauthenticated \
-    --max-instances 1 \
-    --set-env-vars "${ENV_VARS_STRING}"
+    --set-env-vars "${ENV_VARS_STRING}" \
+    --max-retries 3 \
+    --task-timeout 10m
 
 echo "Deployment complete!" 
