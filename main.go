@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"log/slog"
 	"os"
 	"pinboard-popular-feed/data"
@@ -10,7 +11,7 @@ import (
 
 // Add these functions before main()
 func isCloudRun() bool {
-	return os.Getenv("K_SERVICE") != ""
+	return os.Getenv("CLOUD_RUN_JOB") != ""
 }
 
 func setupLogger() {
