@@ -1,11 +1,10 @@
 package main
 
 import (
-	"errors"
-	"fmt"
-	"github.com/gocolly/colly/v2"
-	"log"
+	"log/slog"
 	"pinboard-popular-feed/data"
+
+	"github.com/gocolly/colly/v2"
 )
 
 const pinboardPopularUrl = "https://pinboard.in/popular"
@@ -31,12 +30,12 @@ func ScrapePinboardPopular() ([]*data.Bookmark, error) {
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		log.Println("Visiting", r.URL)
+		slog.Debug("visiting", "url", r.URL.String())
 	})
 
 	err := c.Visit(pinboardPopularUrl)
 	if err != nil {
-		log.Println("error fetching pinboard popular page: " + fmt.Sprint(errors.Unwrap(err)))
+		slog.Error("error fetching pinboard popular page", "error", err)
 		return nil, err
 	}
 
