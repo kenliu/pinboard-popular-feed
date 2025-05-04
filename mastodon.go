@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"pinboard-popular-feed/data"
@@ -16,7 +16,7 @@ type MastodonCredentials struct {
 func TootBookmark(b data.Bookmark, credentials MastodonCredentials) error {
 	tootText := buildToot(b)
 
-	log.Println("posting to mastodon: " + tootText)
+	slog.Info("posting to mastodon", "toot", tootText)
 	client := http.Client{}
 	endpoint := "https://" + credentials.serverDomain + "/api/v1/statuses"
 
@@ -27,7 +27,7 @@ func TootBookmark(b data.Bookmark, credentials MastodonCredentials) error {
 	//generate an error intentionally
 	//req, err := http.NewRequest("POST", endpoint, nil)
 	if err != nil {
-		log.Println("error creating request")
+		slog.Error("error creating request", "error", err)
 		return err
 	}
 
@@ -35,17 +35,15 @@ func TootBookmark(b data.Bookmark, credentials MastodonCredentials) error {
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Println("error posting to mastodon")
+		slog.Error("error posting to mastodon", "error", err)
 		return err
 	}
 	if resp.Status != "200 OK" {
-		log.Println("error posting to mastodon: " + resp.Status)
-		log.Println(resp)
+		slog.Error("error posting to mastodon", "status", resp.Status)
 		return err
 	}
 
-	// TODO log this as a debug message
-	log.Println("posted to mastodon")
+	slog.Debug("successfully posted to mastodon")
 	return nil
 }
 

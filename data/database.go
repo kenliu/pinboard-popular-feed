@@ -3,9 +3,10 @@ package data
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/lib/pq"
-	"log"
+	"log/slog"
 	"os"
+
+	_ "github.com/lib/pq"
 )
 
 type Bookmark struct {
@@ -45,12 +46,13 @@ func (store *BookmarkStore) InitStore(config DBConfig) error {
 	// Open a database connection
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		log.Fatal("error connecting to the database: ", err)
+		slog.Error("error connecting to the database", "error", err)
+		return err
 	}
 	// defer db.Close()
 
 	store.conn = db
-	fmt.Println("Successfully connected to the database")
+	slog.Info("successfully connected to the database")
 	return err
 }
 
@@ -59,7 +61,8 @@ func (store BookmarkStore) StoreBookmark(bookmark Bookmark) error {
 		bookmark.BookmarkId, bookmark.Title, bookmark.Url)
 
 	if err != nil {
-		log.Fatal("error inserting into the database: ", err)
+		slog.Error("error inserting into the database", "error", err)
+		return err
 	}
 	return nil
 }
