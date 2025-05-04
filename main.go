@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"flag"
-	"fmt"
 	"log/slog"
 	"os"
 	"pinboard-popular-feed/data"
