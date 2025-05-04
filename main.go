@@ -23,36 +23,36 @@ func main() {
 	defer logFile.Close()
 	log.SetOutput(logFile)
 
-	log.Println("starting pinboard-popular-feed")
+	log.Println("starting pinboard-popular-feed processing")
 	if *dryRun {
 		log.Println("DRY RUN MODE: Showing what would be posted")
-		fmt.Println("DRY RUN MODE: Showing what would be posted")
 	}
 
 	// set up mastodon credentials
 	mastodonCredentials, err := buildMastodonCredentials()
 	if err != nil {
+		log.Println("error setting up mastodon credentials:", err)
 		os.Exit(1)
 	}
 
 	popular, err := fetchCurrentPinboardPopular()
 	if err != nil {
-		log.Println("error scraping popular bookmarks")
+		log.Println("error scraping popular bookmarks:", err)
 		os.Exit(1)
 	}
 
 	// initialize the bookmark store
-	//db := data.Init()
 	var db = data.BookmarkStore{}
 	db.InitStore(data.CreateDBConfigFromEnv())
 
 	postCount, err := postNewLinks(popular, db, mastodonCredentials, *dryRun)
 	if err != nil {
-		log.Println("error posting new bookmarks")
+		log.Println("error posting new bookmarks:", err)
 		os.Exit(1)
 	}
-	log.Println("posted " + fmt.Sprint(postCount) + " new bookmarks")
-	log.Println("finished pinboard-popular-feed update")
+
+	log.Println("posted", postCount, "new bookmarks")
+	log.Println("finished pinboard-popular-feed processing")
 }
 
 func buildMastodonCredentials() (MastodonCredentials, error) {
