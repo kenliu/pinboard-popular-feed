@@ -27,16 +27,28 @@ type DBConfig struct {
 	Database string
 }
 
-func CreateDBConfigFromEnv() DBConfig {
-	// populate an instance of config struct using environment variables
-	config := DBConfig{
-		Username: os.Getenv("DB_USERNAME"),
-		Password: os.Getenv("DB_PASSWORD"),
-		Host:     os.Getenv("DB_HOST"),
-		Port:     os.Getenv("DB_PORT"),
-		Database: os.Getenv("DB_NAME"),
+func CreateDBConfigFromEnv() (DBConfig, error) {
+	required := []string{"DB_USERNAME", "DB_PASSWORD", "DB_HOST", "DB_PORT", "DB_NAME"}
+	missing := []string{}
+	env := map[string]string{}
+	for _, key := range required {
+		value := os.Getenv(key)
+		if value == "" {
+			missing = append(missing, key)
+		}
+		env[key] = value
 	}
-	return config
+	if len(missing) > 0 {
+		return DBConfig{}, fmt.Errorf("missing required environment variables: %v", missing)
+	}
+	config := DBConfig{
+		Username: env["DB_USERNAME"],
+		Password: env["DB_PASSWORD"],
+		Host:     env["DB_HOST"],
+		Port:     env["DB_PORT"],
+		Database: env["DB_NAME"],
+	}
+	return config, nil
 }
 
 func (store *BookmarkStore) InitStore(config DBConfig) error {

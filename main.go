@@ -41,13 +41,6 @@ func main() {
 		slog.Info("DRY RUN MODE: showing what would be posted")
 	}
 
-	// set up mastodon credentials
-	mastodonCredentials, err := buildMastodonCredentials()
-	if err != nil {
-		slog.Error("error setting up mastodon credentials", "error", err)
-		os.Exit(1)
-	}
-
 	popular, err := fetchCurrentPinboardPopular()
 	if err != nil {
 		slog.Error("error scraping popular bookmarks", "error", err)
@@ -56,7 +49,20 @@ func main() {
 
 	// initialize the bookmark store
 	var db = data.BookmarkStore{}
-	db.InitStore(data.CreateDBConfigFromEnv())
+	dbConfig, err := data.CreateDBConfigFromEnv()
+	if err != nil {
+		slog.Error("missing required DB environment variables", "error", err)
+		os.Exit(1)
+	}
+	db.InitStore(dbConfig)
+
+
+	// set up Mastodon credentials
+	mastodonCredentials, err := buildMastodonCredentials()
+	if err != nil {
+		slog.Error("missing required mastodon credentials", "error", err)
+		os.Exit(1)
+	}
 
 	_, err = postNewLinks(popular, db, mastodonCredentials, *dryRun)
 	if err != nil {
