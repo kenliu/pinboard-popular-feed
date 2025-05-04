@@ -8,16 +8,33 @@ import (
 	"pinboard-popular-feed/data"
 )
 
+// Add these functions before main()
+func isCloudRun() bool {
+	return os.Getenv("K_SERVICE") != ""
+}
+
+func setupLogger() {
+	var handler slog.Handler
+	if isCloudRun() {
+		handler = slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+			Level: slog.LevelInfo,
+		})
+	} else {
+		handler = slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+			Level: slog.LevelInfo,
+		})
+	}
+	logger := slog.New(handler)
+	slog.SetDefault(logger)
+}
+
 func main() {
 	// handle dry-run command line flag
 	dryRun := flag.Bool("dryrun", false, "scan for new posts but don't post to mastodon")
 	flag.Parse()
 
 	// set up logging
-	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-		Level: slog.LevelInfo,
-	}))
-	slog.SetDefault(logger)
+	setupLogger()
 
 	slog.Info("starting pinboard-popular-feed processing")
 	if *dryRun {
