@@ -2,7 +2,7 @@ module pinboard-popular-feed
 
 require (
 	github.com/gocolly/colly/v2 v2.2.0
-	github.com/lib/pq v1.10.9
+	github.com/lib/pq v1.11.2
 )
 
 require (
